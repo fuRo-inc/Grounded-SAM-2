@@ -689,21 +689,16 @@ def filter_and_map_detections(
         if mapped_name is None:
             continue
 
-        if mapped_name == "person":
-            required_threshold = person_threshold
-        elif mapped_name == "car":
-            required_threshold = car_threshold
-        else:
-            required_threshold = max(
-                person_threshold,
-                car_threshold,
-            )
+        score = float(score)
 
-        if float(score) < required_threshold:
+        if mapped_name == "person" and score < person_threshold:
+            continue
+
+        if mapped_name == "car" and score < car_threshold:
             continue
 
         filtered_boxes.append(box)
-        filtered_scores.append(float(score))
+        filtered_scores.append(score)
         original_names.append(
             normalize_class_name(original_name)
         )
@@ -725,8 +720,8 @@ def filter_and_map_detections(
     return class_aware_nms(
         boxes=filtered_boxes_array,
         scores=filtered_scores,
-        mapped_names=mapped_names,
         original_names=original_names,
+        mapped_names=mapped_names,
         iou_threshold=overlap_iou_threshold,
     )
 
